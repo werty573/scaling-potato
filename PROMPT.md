@@ -1,65 +1,98 @@
-# Claude Code prompt — "Soda" ad-grade landing page
+# Claude Code prompt: mind-blowing animated website (for an Instagram ad)
 
-Copy everything below the line into Claude Code (run it inside this repo).
-
-Before you run it:
-1. Save the full original "Recreate this site as a single HTML file: Soda" spec as `reference/spec.md`. The copy pasted in chat was cut off partway through section 4, so the **Assets** section (the URLs for `LEAVES_GLB`, `CHERRY_GLB`, `DEIT_SODA2_GLB`, `GREEN_SODA_PNG`, `BLUE_SODA_PNG`, the bubble PNGs and the blueberry GLB) and the JavaScript section are missing.
-2. Download the reference reel yourself (for example with a reel-downloader site, or by saving it from the Instagram app) and commit it as `reference/reel.mp4`. Instagram blocks most cloud and server downloads, so Claude Code probably won't be able to fetch it on its own.
+Copy everything below the line into Claude Code and run it inside this repo.
 
 ---
 
-You are building a premium, ad-quality product landing page for a fictional drink called **"Soda" (Diet Soda)**. The finished page will be screen-recorded and cut into an **Instagram Reel ad (9:16)**, so it has to look good both as a desktop website and as a vertical video. Go all out: this should look like an award-winning brand site, not a template.
+Build a website with **mind-blowing, award-level animation**. It should be the kind of site that wins Awwwards Site of the Day and makes people stop scrolling. I'll screen-record it and post it as an **Instagram Reel ad (9:16)**, so it has to look incredible as a desktop site *and* as a vertical video.
 
-## Inputs (read them all before writing any code)
+The style, motion, pacing and mood all come from this reference reel:
+**https://www.instagram.com/reel/DdAgrCAO4km/**
 
-1. **`reference/spec.md`**: a detailed spec of a base site (a full-viewport hero with a 3D can in `<model-viewer>`, cherry and leaf GLB models with parallax and cursor repulsion, rising PNG bubbles, a glass header, and a flavor carousel that switches between a teal "Classic" theme and a blue "Zero Lime" theme with a 720° can spin, a texture swap and a berry implode/explode). Treat it as the **minimum baseline**. Every layout, CSS value, interaction and asset URL in it must be kept unless this prompt says to go further.
-   - If `reference/spec.md` is missing or has no Assets section, stop and ask me for it. Don't invent asset URLs. If I tell you to continue without it, use free CC0 GLB models (for example from Poly Pizza or the Khronos glTF samples) and generated PNGs, save them under `assets/`, and list where each one came from in the README.
+## Step 1: Get the reference reel (do this first)
 
-2. **Reference Instagram reel** (the ad style I want): https://www.instagram.com/reel/DdAgrCAO4km/
-   - First look for `reference/reel.mp4`. If it isn't there, try to download the reel with `yt-dlp` (`pip install yt-dlp`). If Instagram blocks the download (it usually does from servers), tell me and ask me to commit the file. Don't guess what the reel looks like.
-   - **Analyze the video.** Use `ffmpeg` to pull frames: one every 0.5s, plus scene-change frames with `-vf "select='gt(scene,0.3)',showinfo"`. Look at those frames and write `reference/reel-analysis.md` covering: the shot-by-shot structure with timestamps, the camera moves, the transitions, typography (font style, size, how text animates on and off), the colour palette (hex values), how the product is staged, the pacing, and the visual tricks to copy.
-   - **Analyze the music.** Extract the audio (`ffmpeg -i reel.mp4 -vn audio.wav`). Use `librosa` (`pip install librosa`) to get the BPM, the beat timestamps, the onsets and strong drops/accents, and the energy curve over time. Add a "Music" section to the analysis: BPM, genre and mood, key moments (intro, build, drop) with timestamps, and a beat grid that the page's animations can lock to. Save the beat timestamps as `reference/beats.json`.
+1. Check whether `reference/reel.mp4` already exists in the repo. If it does, use it.
+2. If it doesn't, try to download the reel:
+   `pip install yt-dlp && yt-dlp -o "reference/reel.%(ext)s" "https://www.instagram.com/reel/DdAgrCAO4km/"`
+3. **If the download fails for any reason** (blocked, login required, proxy error, anything else), **stop and ask me to download it for you.** Say exactly this:
+   > "I couldn't download the reel. Please save it (from the Instagram app or a reel downloader site), add it to the repo as `reference/reel.mp4`, commit and push it, then tell me to continue."
 
-## What to build
+   Then wait for my reply. **Don't guess what the reel looks like, and don't build anything until you've actually analysed the video.**
 
-A single self-contained **`index.html`** at the repo root. Use plain HTML, CSS and JS, with no build step and no framework. Load libraries only from CDNs (GSAP 3.12 from cdnjs, including ScrollTrigger only if you use it, and `@google/model-viewer` from unpkg). Local assets go in `assets/`.
+## Step 2: Analyse the reel (visuals and music)
 
-### 1. Keep the whole baseline from the spec
-Everything in `reference/spec.md` must work exactly as described:
-- the can tilts toward the cursor
-- berries are pushed away by the pointer
-- leaves and berries move with layered parallax
-- bubbles rise endlessly
-- the flavor transition plays as choreographed: background morph, 720° spin with motion blur, texture swap at the peak, berries implode, swap model, then explode to new positions
-- the glass nav, CTA and award badge are all present
-- the accent colour is `#fbcfe8`, and the fonts are Galada, Inter, Manrope and Outfit
+Write your findings to `reference/reel-analysis.md`.
 
-### 2. Upgrade it to match the reel
-Use `reel-analysis.md` to raise the site to ad quality:
-- **Cinematic intro sequence** (about 3–5s, skippable): a GSAP timeline that mirrors the reel's opening. The can drops or rotates into frame, the headline reveals letter by letter or with a mask, and the berries burst outward. Time the key hits to the beat grid in `beats.json`.
-- **Typography and colour**: if the reel's type treatment or palette is stronger than the spec's, adopt it, but keep the Soda brand identity.
-- **Transitions**: copy the reel's transition style (whip pans, zoom punches, colour flashes, liquid wipes — whatever it uses) for the flavor switch, layered on top of the spec's choreography.
-- **Extra polish**: the can rotates slowly on its own when idle, the can catches a specular/light sweep, a subtle film grain/noise overlay, a soft vignette, and magnetic hover on the buttons. Add any other polish from the reel that fits.
-- **Optional music**: add a mute/unmute toggle (muted by default, since browsers block autoplay). Don't ship the reel's copyrighted track. Put an `assets/music.mp3` slot in the code with a short note in the README telling me to add a royalty-free track with a similar BPM and mood (name 2–3 suitable search terms).
+**Visuals.** Use `ffmpeg` to extract one frame every 0.5s, plus scene-change frames (`-vf "select='gt(scene,0.3)',showinfo"`). Look at every frame, then document:
+- the shot-by-shot breakdown with timestamps
+- camera moves (zooms, pans, rotations, parallax, depth)
+- the transitions between shots and exactly how they work
+- typography: font style, weight, size, and how text animates in and out
+- the colour palette, with hex values
+- what the subject or product is and how it's staged
+- lighting, texture, grain and any effects
+- pacing and rhythm
+- the 5 most impressive moments, and how you'd recreate each one on the web
 
-### 3. Ad / recording mode
-- `index.html?ad=1` gives a **1080×1920 (9:16) vertical layout** built for screen-recording the Instagram ad. It stacks the layout vertically (headline on top, can in the middle, flavor cards at the bottom), hides the nav, and **auto-plays a scripted sequence**: intro → hero hold → flavor switch → second flavor hold → end card with "Soda — Pure Zero" and a CTA. Time the whole sequence to the beat grid, and keep it 15–20s long, matching the reel's length.
-- Normal mode stays fully interactive on desktop, and must also look good on mobile.
+**Music.** Extract the audio (`ffmpeg -i reference/reel.mp4 -vn reference/audio.wav`) and analyse it with `librosa`:
+- BPM and beat timestamps
+- onsets and strong hits/drops
+- the energy curve over time
+- genre and mood
+- intro, build and drop timestamps
 
-### 4. Quality bar
-- Hold 60fps: use `transform` and `opacity` only for animation, use `requestAnimationFrame` for cursor-driven motion, and don't cause layout thrash. Use `will-change` sparingly.
-- Respect `prefers-reduced-motion`: switch the intro, spins and bubbles to simple fades.
-- Before claiming the work is done, test it with Playwright (Chromium is pre-installed). Load the page in both modes, wait for the models to load, take screenshots at 1440×900, 390×844 and 1080×1920 (`?ad=1`), check the console for errors, and fix anything broken. Commit the screenshots to `screenshots/`.
+Save the beats and hits as `reference/beats.json` so the animations can sync to them.
+
+**Then ask me what the website is for:** the brand or product name, the tagline, and the colours, if they differ from the reel. Give me a 5–8 line summary of the concept you'd build from the analysis. **Wait for my answer before you start building.**
+
+## Step 3: Build it, and go all out on the animation
+
+Build a single self-contained `index.html` at the repo root, plus an `assets/` folder for local files.
+- Plain HTML, CSS and JS, with no build step.
+- Load libraries from CDNs only (cdnjs, jsDelivr or unpkg). Pick whatever the effects need: **GSAP** (with ScrollTrigger, SplitText or Flip, and CustomEase), **Three.js** (WebGL shaders, particles, post-processing), **Lenis** (smooth scroll), and `<model-viewer>` for 3D models.
+
+The animation has to be the star. It should match the reel's style and go beyond it. The bar is techniques like these:
+- **Cinematic intro.** A preloader that turns into a hero reveal. Text reveals letter by letter, or through masks or clip-paths, and the opening hits land on the music's beats.
+- **WebGL/3D centrepiece.** A 3D object or shader scene that reacts to the cursor: it tilts, follows the pointer, ripples or distorts. Add particles and depth parallax.
+- **Physics-feeling interactivity.** Elements are repelled by or attracted to the cursor, buttons are magnetic, there's a custom cursor, and things move with inertia and spring easing.
+- **Scroll-driven storytelling.** Pinned sections, horizontal scroll, scrubbed timelines, zoom-through transitions, and layered parallax. If the reel has distinct scenes, each one becomes a section.
+- **Choreographed transitions.** Reproduce the reel's transitions (whip pans, zoom punches, liquid or shader wipes, colour floods, morphs, implode/explode) between sections or states.
+- **Finishing polish.** Film grain or noise, vignette, light sweeps, motion blur on fast moves, colour grading, and smooth idle motion so it never looks static.
+
+Every motion should feel intentional and premium: custom easing, nothing linear, nothing janky.
+
+### Ad / recording mode
+`index.html?ad=1` is a **1080×1920 (9:16) vertical version** made for screen-recording the Instagram ad:
+- no navigation and no scrolling needed
+- it **auto-plays a scripted sequence** that runs intro → the 2–4 best moments → end card with brand name and CTA
+- it's timed to `beats.json`, and its length matches the reel's (about 15–20s)
+
+### Music
+Add a mute/unmute toggle that's muted by default, since browsers block autoplay. **Don't ship the reel's track; it's copyrighted.** Leave a slot for `assets/music.mp3`. In the README, give me 3 search terms for a royalty-free track with a matching BPM and mood.
+
+### Performance and quality
+- Hold 60fps:
+  - animate `transform`, `opacity` and shaders only
+  - use `requestAnimationFrame` for pointer-driven motion
+  - lower the pixel ratio and particle counts on mobile
+- Respect `prefers-reduced-motion` by falling back to simple fades.
+- Make it fully responsive (desktop and phone).
+- **Test before saying it's done.** Use Playwright (Chromium is installed):
+  - load the page in normal mode and in `?ad=1`
+  - check the console for errors
+  - screenshot at 1440×900, 390×844 and 1080×1920 (ad mode)
+  - record a short video of ad mode if possible
+  - look at the results and fix anything that looks broken or underwhelming
 
 ## Deliverables
-- `index.html`, plus `assets/` for any local files
+- `index.html` and `assets/`
 - `reference/reel-analysis.md` and `reference/beats.json`
-- `screenshots/` with desktop, mobile and ad-mode screenshots
-- `README.md` covering how to open the page, how to record the ad (open `?ad=1` in Chrome at 1080×1920, record with OBS or the browser's screen recorder, add the music track in CapCut or Premiere), and asset credits
+- `screenshots/` (and `screenshots/ad-mode.webm` if you recorded one)
+- `README.md`: how to open the page, how to record the ad (open `?ad=1` in Chrome at 1080×1920, record with OBS, add music in CapCut or Premiere), and credits for any assets
 
-## Git
-When everything works and the screenshots look right:
-- commit with clear messages (one commit per logical step is fine)
+## Step 4: Push to GitHub
+When it all works and the screenshots look great:
+- commit with clear messages
 - push to the current branch with `git push -u origin <current-branch>`
-- don't open a pull request unless I ask
-- tell me which branch you pushed and summarize what you built, including anything you couldn't do (for example, if the reel download was blocked)
+- **don't open a pull request** unless I ask
+- tell me which branch you pushed to, summarize what you built, and list anything you couldn't do
