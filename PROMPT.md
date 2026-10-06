@@ -64,15 +64,15 @@ Then show me a short shot list for MY ad that follows the reel's structure but u
 
 STEP 4: MAKE THE AD
 - Add an ad mode to the website: index.html?ad=1 renders a 1080x1920 (9:16) vertical version with no nav or scrolling, and auto-plays a scripted sequence that follows the approved shot list: the hook, the website's best animation moments, text overlays styled like the reel's, and an end card with the brand name and CTA. Every cut and hit lands on the timestamps in beats.json, and the total length matches the reel.
-- Record it: use Playwright to record ad mode at 1080x1920, then use ffmpeg to export reference-free final videos to ad/:
-  - ad/ad-silent.mp4 (H.264, 1080x1920, 30fps, Instagram-ready)
-  - if assets/music.mp3 exists, also ad/ad-with-music.mp4 with the music mixed in and synced
-- Do NOT use the reel's audio in the final ad; it's copyrighted. In the README, give me 3 search terms for royalty-free tracks with a matching BPM and mood, and tell me to drop one in as assets/music.mp3 and ask you to re-export.
-- Watch your own export (pull frames from it) and fix anything that looks off before telling me it's done.
+- Use the reference reel's music as the ad's soundtrack: extract it at full quality (ffmpeg -i reference/reel.mp4 -vn -c:a aac -b:a 192k ad/music.m4a), trimmed to the same length as the ad, and sync every cut and hit to it.
+- Record it: use Playwright to record ad mode at 1080x1920, then use ffmpeg to export the final videos to ad/:
+  - ad/ad.mp4: H.264, 1080x1920, 30fps, AAC audio, Instagram-ready, with the reel's music mixed in and perfectly in sync (no drift, no offset at the start)
+  - ad/ad-silent.mp4: the same video without audio, as a backup
+- Watch your own export (pull frames from it and check the audio lines up with the beat timestamps) and fix anything that looks or sounds off before telling me it's done.
 
 STEP 5: PUSH TO GITHUB
 When everything works:
-- add reference/reel.mp4 and reference/audio.wav to .gitignore so the copyrighted reel never gets pushed
+- add reference/reel.mp4 and reference/audio.wav to .gitignore (the source reel doesn't need to be in the repo)
 - write a README.md: how to open the site, how to re-record the ad, and credits for any assets
 - commit with clear messages
 - push with git push -u origin <current-branch>. If this folder isn't a git repo or has no GitHub remote, ask me which repo to push to
