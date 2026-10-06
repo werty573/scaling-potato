@@ -14,8 +14,9 @@ The style, motion, pacing and mood all come from this reference reel:
 1. Check whether `reference/reel.mp4` already exists in the repo. If it does, use it.
 2. If it doesn't, try to download the reel:
    `pip install yt-dlp && yt-dlp -o "reference/reel.%(ext)s" "https://www.instagram.com/reel/DdAgrCAO4km/"`
-3. **If the download fails for any reason** (blocked, login required, proxy error, anything else), **stop and ask me to download it for you.** Say exactly this:
-   > "I couldn't download the reel. Please save it (from the Instagram app or a reel downloader site), add it to the repo as `reference/reel.mp4`, commit and push it, then tell me to continue."
+3. Also check `~/Downloads` for a recently downloaded reel video.
+4. **If the download fails for any reason** (blocked, login required, no video found, proxy error, anything else), **stop and ask me to download it for you.** Say exactly this:
+   > "I couldn't download the reel. Please download it (from the Instagram app or a reel downloader site) and save it in this project folder as `reference/reel.mp4`, or just tell me where you saved it. Then tell me to continue."
 
    Then wait for my reply. **Don't guess what the reel looks like, and don't build anything until you've actually analysed the video.**
 
@@ -77,7 +78,7 @@ Add a mute/unmute toggle that's muted by default, since browsers block autoplay.
   - lower the pixel ratio and particle counts on mobile
 - Respect `prefers-reduced-motion` by falling back to simple fades.
 - Make it fully responsive (desktop and phone).
-- **Test before saying it's done.** Use Playwright (Chromium is installed):
+- **Test before saying it's done.** Use Playwright (install it with `npm i -D playwright && npx playwright install chromium` if needed):
   - load the page in normal mode and in `?ad=1`
   - check the console for errors
   - screenshot at 1440×900, 390×844 and 1080×1920 (ad mode)
