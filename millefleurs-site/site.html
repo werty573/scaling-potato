@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mille Fleurs Clinic</title>
+<meta name="description" content="Mille Fleurs Clinic, Woodbrook: medical clinic and luxury spa. Facials, medical aesthetics, doctor consultations, massage and nails at #50 Petra Street, Port of Spain.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Italiana&family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: a millefleur "tapestry" hero, then a calm single column of service rooms on a lagoon-tinted ground; one bold idea (the flower field), everything else quiet. */
+:root {
+  --ground: #f3f7f6;        /* paper with a teal bias */
+  --surface: #ffffff;
+  --ink: #12302f;           /* deep lagoon ink */
+  --ink-soft: #4a6463;
+  --lagoon: #0e5a5c;        /* brand teal */
+  --lagoon-deep: #093f41;
+  --petal: #e9b8c4;         /* blossom pink */
+  --gold: #b38a3e;          /* Ceremony of Gold accent */
+  --line: #d3e0de;
+  --on-lagoon: #f3f7f6;
+  --tint: #e4efed;
+
+  --display: "Italiana", "Didot", "Bodoni 72", Georgia, serif;
+  --body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+
+  --step--1: .875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.3rem;
+  --step-2: 1.75rem;
+  --step-3: 2.5rem;
+  --step-4: clamp(2.75rem, 7vw, 5.25rem);
+  --gutter: clamp(16px, 4vw, 48px);
+  --max: 1160px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0b1a1a; --surface: #102525; --ink: #e6f0ee; --ink-soft: #9fb8b5;
+    --lagoon: #5fb3ad; --lagoon-deep: #0e3a3b; --petal: #d995a7; --gold: #d2ab62;
+    --line: #21403f; --on-lagoon: #0b1a1a; --tint: #132d2d; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0b1a1a; --surface: #102525; --ink: #e6f0ee; --ink-soft: #9fb8b5;
+  --lagoon: #5fb3ad; --lagoon-deep: #0e3a3b; --petal: #d995a7; --gold: #d2ab62;
+  --line: #21403f; --on-lagoon: #0b1a1a; --tint: #132d2d; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--ground); color: var(--ink);
+  font-family: var(--body); font-size: var(--step-0); line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--gold); outline-offset: 3px;
+}
+h1, h2, h3 { font-family: var(--display); font-weight: 400; line-height: 1.08; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+.wrap { max-width: var(--max); margin-inline: auto; padding-inline: var(--gutter); }
+.eyebrow {
+  font-size: var(--step--1); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--lagoon); font-weight: 600;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: .5em; padding: .8em 1.4em;
+  border-radius: 999px; font: 500 var(--step--1)/1 var(--body); letter-spacing: .06em;
+  text-transform: uppercase; text-decoration: none; border: 1px solid var(--lagoon);
+  cursor: pointer; transition: background .2s, color .2s;
+}
+.btn-solid { background: var(--lagoon); color: var(--on-lagoon); }
+.btn-solid:hover { background: var(--lagoon-deep); border-color: var(--lagoon-deep); color: #f3f7f6; }
+.btn-ghost { background: transparent; color: var(--lagoon); }
+.btn-ghost:hover { background: var(--tint); }
+
+/* Header */
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
+  background: color-mix(in srgb, var(--ground) 88%, transparent);
+  backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+}
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: .8rem; }
+.brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; }
+.brand svg { width: 30px; height: 30px; flex: none; }
+.brand b { font: 400 1.45rem/1 var(--display); letter-spacing: .02em; }
+.brand small { display: block; font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); }
+.nav { display: flex; gap: 1.4rem; align-items: center; }
+.nav a { text-decoration: none; font-size: var(--step--1); color: var(--ink-soft); }
+.nav a:hover { color: var(--lagoon); }
+@media (max-width: 860px) { .nav a:not(.btn) { display: none; } }
+
+/* Hero: the millefleur field */
+.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+#field { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, var(--ground) 0%, color-mix(in srgb, var(--ground) 92%, transparent) 42%, color-mix(in srgb, var(--ground) 20%, transparent) 100%);
+}
+.hero .wrap { position: relative; z-index: 1; padding-block: clamp(3.5rem, 9vw, 7.5rem); display: grid; gap: 1.6rem; }
+.hero h1 { font-size: var(--step-4); max-width: 13ch; }
+.hero h1 em { font-style: normal; color: var(--lagoon); }
+.hero .lede { font-size: var(--step-1); color: var(--ink-soft); max-width: 36ch; font-weight: 300; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: .8rem; }
+.hero .where { font-size: var(--step--1); color: var(--ink-soft); letter-spacing: .04em; }
+
+/* Section frame */
+section.block { padding-block: clamp(3.5rem, 8vw, 6.5rem); }
+.head { display: grid; gap: .8rem; margin-bottom: 2.5rem; max-width: 60ch; }
+.head h2 { font-size: var(--step-3); }
+.head p { color: var(--ink-soft); }
+
+/* Specials */
+.specials { background: var(--lagoon-deep); color: #e6f0ee; }
+.specials .eyebrow { color: var(--petal); }
+.specials .head p { color: #b9cfcc; }
+.offer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 1px; background: #2a5856; border: 1px solid #2a5856; }
+.offer { background: var(--lagoon-deep); padding: 1.6rem; display: grid; gap: .5rem; align-content: start; min-width: 0; }
+.offer h3 { font-size: var(--step-2); color: #f3f7f6; }
+.offer .price { font-variant-numeric: tabular-nums; color: #e3c27f; font-weight: 500; letter-spacing: .02em; }
+.offer p { color: #b9cfcc; font-size: .98rem; }
+.fine { margin-top: 1.4rem; font-size: var(--step--1); color: #9fb8b5; max-width: 80ch; }
+
+/* Rooms (service pillars) */
+.rooms { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.room { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 2rem; padding-block: 2.2rem; border-bottom: 1px solid var(--line); }
+@media (max-width: 760px) { .room { grid-template-columns: minmax(0, 1fr); gap: 1rem; } }
+.room h3 { font-size: var(--step-2); }
+.room .kicker { color: var(--ink-soft); margin-top: .5rem; max-width: 34ch; }
+.room ul { list-style: none; margin: 0; padding: 0; columns: 2 220px; column-gap: 2rem; }
+.room li { padding: .45rem 0; border-bottom: 1px dotted var(--line); break-inside: avoid; display: flex; gap: .6rem; align-items: baseline; }
+.room li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--petal); flex: none; transform: translateY(-1px); }
+
+/* Membership */
+.member { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+@media (max-width: 820px) { .member { grid-template-columns: minmax(0, 1fr); } }
+.tiers { display: grid; gap: 1rem; }
+.tier { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1.4rem 1.6rem; display: grid; grid-template-columns: 1fr auto; gap: .3rem 1rem; align-items: baseline; }
+.tier h3 { font-size: var(--step-1); font-family: var(--body); font-weight: 600; }
+.tier .amt { font: 400 var(--step-2)/1 var(--display); color: var(--lagoon); font-variant-numeric: tabular-nums; }
+.tier p { grid-column: 1 / -1; color: var(--ink-soft); font-size: .95rem; }
+.perks { list-style: none; padding: 0; margin: 1.2rem 0 0; display: grid; gap: .5rem; color: var(--ink-soft); }
+.perks li::before { content: "✿ "; color: var(--gold); }
+
+/* Journeys */
+.journeys { background: var(--tint); }
+.j-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 1.2rem; }
+.journey { background: var(--surface); padding: 1.5rem; border-top: 3px solid var(--petal); display: grid; gap: .6rem; align-content: start; min-width: 0; }
+.journey .eyebrow { font-size: .72rem; }
+.journey h3 { font-size: var(--step-1); font-family: var(--body); font-weight: 600; line-height: 1.3; }
+.journey p { color: var(--ink-soft); font-size: .96rem; }
+
+/* People */
+.people { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 2rem; }
+.person { display: grid; gap: .5rem; align-content: start; }
+.person .mono {
+  width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--tint); color: var(--lagoon); font: 400 1.6rem/1 var(--display); border: 1px solid var(--line);
+}
+.person h3 { font-size: var(--step-2); }
+.person .role { font-size: var(--step--1); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+.person p { color: var(--ink-soft); font-size: .98rem; }
+.community { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 1.5rem; }
+.community div { display: grid; gap: .3rem; }
+.community b { font-weight: 600; }
+.community span { color: var(--ink-soft); font-size: .95rem; }
+
+/* Brands */
+.brands { display: flex; flex-wrap: wrap; gap: 1rem 3rem; align-items: baseline; padding-block: 2rem; border-block: 1px solid var(--line); }
+.brands span { font: 400 var(--step-2)/1.2 var(--display); color: var(--ink-soft); }
+.brands small { font-size: var(--step--1); color: var(--ink-soft); letter-spacing: .1em; text-transform: uppercase; }
+
+/* Book */
+.book { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(2rem, 5vw, 4rem); }
+@media (max-width: 820px) { .book { grid-template-columns: minmax(0, 1fr); } }
+.contact { display: grid; gap: 1.4rem; align-content: start; }
+.contact dl { margin: 0; display: grid; gap: 1.1rem; }
+.contact dt { font-size: var(--step--1); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+.contact dd { margin: .2rem 0 0; font-size: var(--step-1); user-select: all; }
+.contact dd.plain { user-select: text; }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: clamp(1.2rem, 3vw, 2rem); display: grid; gap: 1rem; }
+.row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 1rem; }
+label { display: grid; gap: .35rem; font-size: var(--step--1); font-weight: 500; color: var(--ink-soft); }
+input, select, textarea {
+  font: inherit; font-size: 1rem; color: var(--ink); background: var(--ground);
+  border: 1px solid var(--line); border-radius: 3px; padding: .7rem .8rem; width: 100%;
+}
+textarea { min-height: 90px; resize: vertical; }
+.form-note { font-size: var(--step--1); color: var(--ink-soft); }
+#waLink[hidden] { display: none !important; }
+
+footer { background: var(--lagoon-deep); color: #b9cfcc; padding-block: 3rem; font-size: .95rem; }
+footer .wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 2rem; }
+footer b { color: #f3f7f6; font-weight: 500; display: block; margin-bottom: .4rem; }
+footer a { color: #e6f0ee; }
+footer .legal { grid-column: 1 / -1; border-top: 1px solid #2a5856; padding-top: 1.5rem; font-size: var(--step--1); color: #87a3a0; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Mille Fleurs Clinic, home">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><g fill="var(--lagoon)"><circle cx="20" cy="10" r="7"/><circle cx="29.5" cy="17" r="7"/><circle cx="26" cy="28" r="7"/><circle cx="14" cy="28" r="7"/><circle cx="10.5" cy="17" r="7"/></g><circle cx="20" cy="20" r="4.5" fill="var(--gold)"/></svg>
+      <span><b>Mille Fleurs</b><small>Medical Clinic &amp; Spa</small></span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#services">Services</a>
+      <a href="#specials">This Month</a>
+      <a href="#membership">Nail Membership</a>
+      <a href="#team">Our Team</a>
+      <a class="btn btn-solid" href="#book">Book</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" aria-labelledby="hero-title">
+    <canvas id="field" aria-hidden="true"></canvas>
+    <div class="wrap">
+      <p class="eyebrow">Woodbrook · Port of Spain</p>
+      <h1 id="hero-title">Where clinical expertise meets <em>true relaxation.</em></h1>
+      <p class="lede">Skin, medical aesthetics, general health and spa care under one roof, delivered by doctors and trained therapists who take the time to understand you.</p>
+      <div class="actions">
+        <a class="btn btn-solid" href="#book">Book your first visit</a>
+        <a class="btn btn-ghost" href="#services">Explore services</a>
+      </div>
+      <p class="where">#50 Petra Street, Woodbrook · Call or WhatsApp 355-SPAS (7727)</p>
+    </div>
+  </section>
+
+  <section class="block specials" id="specials" aria-labelledby="specials-title">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">October 2026</p>
+        <h2 id="specials-title">Your October, Optimized.</h2>
+        <p>The art of looking well, feeling well and living well, with curated experiences across skin, aesthetics, health and wellness. Limited appointments; book early to secure your date.</p>
+      </div>
+      <div class="offer-grid">
+        <article class="offer">
+          <h3>The Vitality Edit</h3>
+          <p class="price">$1,100 TTD</p>
+          <p>Massage, sauna and a personalised facial, paired with a doctor's consultation.</p>
+        </article>
+        <article class="offer">
+          <h3>Collagen, Optimized</h3>
+          <p class="price">from $1,400 TTD</p>
+          <p>Microneedling or RF Microneedling with pre-treatment skin preparation and personalised peptide enhancement.</p>
+        </article>
+        <article class="offer">
+          <h3>The Art of Pause</h3>
+          <p class="price">from $630 TTD</p>
+          <p>Restorative massage, facial and nail experiences created for intentional self-care.</p>
+        </article>
+        <article class="offer">
+          <h3>Beyond The Flare</h3>
+          <p class="price">$200 TTD</p>
+          <p>A focused skin consultation for persistent dryness, irritation, flaking and sensitivity. Fully redeemable toward your recommended treatment when booked.</p>
+        </article>
+        <article class="offer">
+          <h3>Let's Tox About It</h3>
+          <p class="price">40% off</p>
+          <p>40% off Botulinum Toxin per-unit cost and professional fee.</p>
+        </article>
+        <article class="offer">
+          <h3>The Divali Edit</h3>
+          <p class="price">from $1,000 TTD</p>
+          <p>Pre-booking is open for three celebration-ready spa experiences.</p>
+        </article>
+      </div>
+      <p class="fine">Selected treatments are subject to consultation and suitability. A $400 Medical Aesthetic Consultation Fee applies to Botulinum Toxin treatments and is waived when treatment is booked the same day. Gift certificates available.</p>
+    </div>
+  </section>
+
+  <section class="block" id="services" aria-labelledby="services-title">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Services</p>
+        <h2 id="services-title">Four rooms, one approach.</h2>
+        <p>Every treatment starts with a consultation. We look at your skin, your health and your goals, then build a plan rather than a one-off appointment.</p>
+      </div>
+      <div class="rooms">
+        <div class="room">
+          <div><h3>Skin &amp; Facials</h3><p class="kicker">Professional facials tailored to your skin type, with care for melanin-rich skin under the Caribbean sun.</p></div>
+          <ul>
+            <li>Personalised skin analysis</li><li>Signature Facial</li><li>Brightening Facial</li><li>BioTense Facial</li>
+            <li>Hydrocell Facial</li><li>Cellular-Matrix Facial</li><li>Ceremony of Gold Facial</li><li>Carbon Peel Facial</li>
+            <li>Express Glow Facial (30 min)</li><li>Chemical peels</li><li>Dermaplaning</li><li>Microdermabrasion</li>
+          </ul>
+        </div>
+        <div class="room">
+          <div><h3>Medical Aesthetics</h3><p class="kicker">Physician-led treatments with subtle, natural results. Refinement, not transformation.</p></div>
+          <ul>
+            <li>Microneedling</li><li>RF Microneedling</li><li>Botox &amp; dermal fillers</li><li>PRP &amp; PRF</li>
+            <li>PRP hair restoration</li><li>Laser hair removal</li><li>Pigment laser</li><li>Ultherapy skin tightening</li>
+            <li>Emsculpt body sculpting</li>
+          </ul>
+        </div>
+        <div class="room">
+          <div><h3>Medical Clinic</h3><p class="kicker">Preventative and general care from our doctors, with precision and discretion.</p></div>
+          <ul>
+            <li>Doctor consultations</li><li>Executive &amp; preventative medicals</li><li>Blood analysis</li><li>Breast examinations &amp; Pap smears</li>
+            <li>IV therapy</li><li>Weight management</li><li>Mole &amp; skin tag removal</li><li>Wart removal</li>
+            <li>Ingrown toenail treatment</li><li>Ear irrigation</li><li>Small surgical procedures</li>
+          </ul>
+        </div>
+        <div class="room">
+          <div><h3>Spa, Body &amp; Nails</h3><p class="kicker">Time to switch everything off. Massage, body rituals and nail care with clean, lasting finishes.</p></div>
+          <ul>
+            <li>Aromatherapy &amp; therapeutic massage</li><li>Couples massage</li><li>Full body scrub</li><li>Eucalyptus steam sauna</li>
+            <li>Manicures &amp; spa pedicures</li><li>Gel-X &amp; acrylic sets</li><li>BIAB structured manicure</li><li>Men's grooming &amp; manicures</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="membership" aria-labelledby="member-title" style="padding-top:0">
+    <div class="wrap member">
+      <div class="head" style="margin-bottom:0">
+        <p class="eyebrow">Nail Membership</p>
+        <h2 id="member-title">Polished &amp; Poised</h2>
+        <p>Beautiful nails shouldn't be something you have to remember to make time for. Your monthly nail ritual keeps your nails consistently fresh, polished and appointment-ready.</p>
+        <ul class="perks">
+          <li>A qualifying monthly nail appointment</li>
+          <li>Preferred member pricing and priority recurring appointments</li>
+          <li>Member-only offers and seasonal upgrades</li>
+          <li>Founding Member perks for our first members</li>
+        </ul>
+      </div>
+      <div class="tiers">
+        <div class="tier"><h3>Gel-X Membership</h3><span class="amt">$395</span><p>Per month, TTD. Introductory Gel-X Essentials $375.</p></div>
+        <div class="tier"><h3>Acrylic Membership</h3><span class="amt">$495</span><p>Per month, TTD. Introductory Acrylic Essentials $475.</p></div>
+        <p class="form-note">Essentials include flat gel polish, 4 accent nails and gel-polish toes. French upgrade +$25. Three-month initial commitment; terms and conditions apply.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block journeys" aria-labelledby="journeys-title">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Client Journeys</p>
+        <h2 id="journeys-title">Real skin progress is rarely about one appointment.</h2>
+        <p>It's about the right treatment plan. A few of the journeys our clients have shared with us.</p>
+      </div>
+      <div class="j-grid">
+        <article class="journey"><p class="eyebrow">RF Microneedling</p><h3>Acne scarring</h3><p>A series of RF Microneedling sessions planned around persistent scarring and uneven texture.</p></article>
+        <article class="journey"><p class="eyebrow">Retinol Chemical Peel</p><h3>Acne &amp; skin clarity</h3><p>A peel programme for active acne, post-inflammatory marks and congestion.</p></article>
+        <article class="journey"><p class="eyebrow">PRP Hair Restoration</p><h3>Thinning hair</h3><p>Physician-led PRP to support the follicles you still have, for a wider part and reduced density.</p></article>
+        <article class="journey"><p class="eyebrow">TCA Peel + Microneedling</p><h3>Back acne &amp; dark marks</h3><p>A combined plan for breakouts, persistent dark marks and uneven skin tone.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="team" aria-labelledby="team-title">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Our Team</p>
+        <h2 id="team-title">Care that starts with the right people.</h2>
+        <p>Every service is delivered by trained professionals who are passionate about results, safety and personalised care.</p>
+      </div>
+      <div class="people">
+        <div class="person"><div class="mono" aria-hidden="true">UM</div><p class="role">Founder</p><h3>Urmilla Maharaj-Thompson</h3><p>Leads the clinic's vision of making quality health and wellness care accessible to the Woodbrook community and beyond.</p></div>
+        <div class="person"><div class="mono" aria-hidden="true">AT</div><p class="role">Co-Founder</p><h3>Allen Thompson</h3><p>His journey from patient to advocate is at the heart of everything we do. Everyone deserves quality, compassionate care.</p></div>
+        <div class="person"><div class="mono" aria-hidden="true">AS</div><p class="role">Physician</p><h3>Dr. Alyssa Seedansingh</h3><p>Champions preventative care and early detection, from stress and blood pressure to skin health.</p></div>
+      </div>
+      <div class="community">
+        <div><b>Free wellness screenings</b><span>Blood pressure checks and wellness assessments with the Office of the Councillor for Woodbrook.</span></div>
+        <div><b>On the road with you</b><span>Complimentary health checks at the RFHL and RBL 5K events.</span></div>
+        <div><b>Continuous education</b><span>Our team trains with Nelly De Vuyst and KLAPP on advanced skincare protocols.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" aria-label="Skincare we use and stock">
+    <div class="brands">
+      <small>Professional skincare we use and stock</small>
+      <span>Nelly De Vuyst</span><span>KLAPP</span><span>AromaWorks</span><span>BioFemme</span>
+    </div>
+  </section>
+
+  <section class="block" id="book" aria-labelledby="book-title">
+    <div class="wrap book">
+      <div class="contact">
+        <div class="head" style="margin-bottom:0">
+          <p class="eyebrow">Book</p>
+          <h2 id="book-title">Your first visit is the beginning of your wellness journey.</h2>
+          <p>Appointments are by booking. Our Front Concierge will confirm your time by phone or WhatsApp.</p>
+        </div>
+        <dl>
+          <div><dt>Call or WhatsApp</dt><dd>868-355-SPAS (7727)</dd></div>
+          <div><dt>Call</dt><dd>868-610-SPAS (7727)</dd></div>
+          <div><dt>Visit</dt><dd class="plain">#50 Petra Street, Woodbrook, Port of Spain, Trinidad &amp; Tobago</dd></div>
+        </dl>
+      </div>
+      <form id="bookForm" novalidate>
+        <div class="row2">
+          <label for="f-name">Your name<input id="f-name" name="name" autocomplete="name" required></label>
+          <label for="f-phone">Phone<input id="f-phone" name="phone" type="tel" autocomplete="tel" placeholder="868-"></label>
+        </div>
+        <div class="row2">
+          <label for="f-service">I'm interested in
+            <select id="f-service" name="service">
+              <option>Skin &amp; Facials</option><option>Medical Aesthetics</option><option>Medical Clinic</option>
+              <option>Spa &amp; Body</option><option>Nails / Polished &amp; Poised</option><option>October specials</option><option>Gift certificate</option>
+            </select>
+          </label>
+          <label for="f-date">Preferred date<input id="f-date" name="date" type="date"></label>
+        </div>
+        <label for="f-notes">Anything we should know?<textarea id="f-notes" name="notes" placeholder="Skin concerns, preferred time, questions"></textarea></label>
+        <button class="btn btn-solid" type="submit">Prepare WhatsApp message</button>
+        <p class="form-note" id="formStatus" role="status">This prepares a message to our concierge on WhatsApp. Nothing is sent until you send it there.</p>
+        <a class="btn btn-ghost" id="waLink" href="#" target="_blank" rel="noopener" hidden>Open WhatsApp to send</a>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><b>Mille Fleurs Clinic</b>#50 Petra Street<br>Woodbrook, Port of Spain</div>
+    <div><b>Contact</b>610-SPAS (7727)<br>355-SPAS (7727)<br>Careers: jobs@millefleursspa.com</div>
+    <div><b>Follow</b><a href="https://www.instagram.com/millefleursclinic/" target="_blank" rel="noopener">Instagram</a><br><a href="https://www.facebook.com/292595794688483" target="_blank" rel="noopener">Facebook</a></div>
+    <p class="legal">Medical and aesthetic treatments are subject to consultation and suitability. Results vary between individuals. © Mille Fleurs Clinic.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // Millefleur field: a tapestry of small five- and six-petal flowers, like the medieval "thousand flowers" ground.
+  var canvas = document.getElementById('field');
+  var ctx = canvas.getContext('2d');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var seed = 7;
+  function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+  var flowers = [];
+
+  function colors() {
+    var s = getComputedStyle(document.documentElement);
+    return [s.getPropertyValue('--lagoon').trim(), s.getPropertyValue('--petal').trim(), s.getPropertyValue('--gold').trim(), s.getPropertyValue('--line').trim()];
+  }
+
+  function build(w, h) {
+    seed = 7; flowers = [];
+    var count = Math.round((w * h) / 2600);
+    for (var i = 0; i < count; i++) {
+      flowers.push({ x: rnd() * w, y: rnd() * h, r: 4 + rnd() * 9, petals: rnd() < .7 ? 5 : 6, rot: rnd() * Math.PI, c: rnd(), delay: rnd() * 900 });
+    }
+  }
+
+  function flower(f, k, pal) {
+    var col = f.c < .45 ? pal[0] : f.c < .75 ? pal[1] : f.c < .85 ? pal[2] : pal[3];
+    var r = f.r * k;
+    ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.rot);
+    ctx.fillStyle = col; ctx.globalAlpha = .75;
+    for (var p = 0; p < f.petals; p++) {
+      ctx.rotate((Math.PI * 2) / f.petals);
+      ctx.beginPath(); ctx.ellipse(0, -r * .62, r * .34, r * .6, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1; ctx.fillStyle = pal[2];
+    ctx.beginPath(); ctx.arc(0, 0, r * .2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function draw(t) {
+    var w = canvas.clientWidth, h = canvas.clientHeight, pal = colors();
+    ctx.clearRect(0, 0, w, h);
+    var done = true;
+    flowers.forEach(function (f) {
+      var k = 1;
+      if (t !== null) { k = Math.min(1, Math.max(0, (t - f.delay) / 700)); k = 1 - Math.pow(1 - k, 3); if (k < 1) done = false; }
+      if (k > 0) flower(f, k, pal);
+    });
+    return done;
+  }
+
+  function size() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = canvas.clientWidth * dpr; canvas.height = canvas.clientHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    build(canvas.clientWidth, canvas.clientHeight);
+  }
+
+  size();
+  if (reduce) { draw(null); } else {
+    var start = null;
+    draw(null); // complete at rest first, then bloom
+    requestAnimationFrame(function step(ts) {
+      if (start === null) start = ts;
+      if (!draw(ts - start)) requestAnimationFrame(step); else draw(null);
+    });
+  }
+  var rt;
+  window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { size(); draw(null); }, 120); });
+  new MutationObserver(function () { draw(null); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { draw(null); });
+
+  // Booking form: compose a WhatsApp message to the concierge.
+  var form = document.getElementById('bookForm');
+  var link = document.getElementById('waLink');
+  var status = document.getElementById('formStatus');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = form.name.value.trim();
+    if (!name) { status.textContent = 'Add your name so our concierge knows who to confirm with.'; form.name.focus(); return; }
+    var lines = ['Hello Mille Fleurs, I would like to book an appointment.', 'Name: ' + name];
+    if (form.phone.value.trim()) lines.push('Phone: ' + form.phone.value.trim());
+    lines.push('Interested in: ' + form.service.value);
+    if (form.date.value) lines.push('Preferred date: ' + form.date.value);
+    if (form.notes.value.trim()) lines.push('Notes: ' + form.notes.value.trim());
+    link.href = 'https://wa.me/18683557727?text=' + encodeURIComponent(lines.join('\n'));
+    link.hidden = false;
+    status.textContent = 'Your message is ready. Open WhatsApp to review and send it.';
+    link.focus();
+  });
+})();
+</script>
+</body>
+</html>
