@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Saman Event Rentals ad</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Manrope:wght@300;400;500;600;700;800&display=swap">
+<style>
+  html, body { margin: 0; background: #000; }
+  canvas { display: block; width: 1080px; height: 1920px; }
+  /* force font downloads before first frame */
+  .warm { position: absolute; left: -9999px; }
+  .warm i { font-family: "Bodoni Moda"; font-style: italic; }
+  .warm b { font-family: "Bodoni Moda"; font-weight: 400; }
+  .warm s { font-family: "Manrope"; font-weight: 600; }
+  .warm u { font-family: "Manrope"; font-weight: 800; }
+  .warm em { font-family: "Manrope"; font-weight: 400; }
+</style>
+</head>
+<body>
+<div class="warm"><i>forever</i><b>Set</b><s>TT$</s><u>QUOTE</u><em>guests</em></div>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+/* Deterministic 22-second, 9:16 ad. window.render(t) draws the frame at time t (seconds). */
+const W = 1080, H = 1920, DUR = 22;
+const c = document.getElementById('c'), x = c.getContext('2d');
+const C = { night: '#0e1714', night2: '#15211d', ivory: '#f4eee4', dim: '#b9b2a5', gold: '#d2b07a', petal: '#e6bfb8' };
+const SERIF = '"Bodoni Moda", Didot, Georgia, serif', SANS = '"Manrope", "Helvetica Neue", Arial, sans-serif';
+
+// ---------- helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const eo = p => 1 - Math.pow(1 - p, 3);              // ease out cubic
+const eio = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const lerp = (a, b, p) => a + (b - a) * p;
+function rng(s) { return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
+function money(n) { return 'TT$' + Math.round(n).toLocaleString('en-US'); }
+// visibility envelope: fade in over fi, out over fo
+function env(t, a, b, fi = .35, fo = .35) { return Math.min(seg(t, a, a + fi), 1 - seg(t, b - fo, b)); }
+
+function text(str, px, y, o = {}) {
+  x.save();
+  x.globalAlpha *= o.alpha ?? 1;
+  x.font = `${o.style || ''} ${o.weight || 400} ${o.size || 80}px ${o.font || SERIF}`;
+  x.fillStyle = o.color || C.ivory;
+  x.textAlign = o.align || 'center';
+  x.textBaseline = 'alphabetic';
+  if (o.spacing) x.letterSpacing = o.spacing + 'px';
+  if (o.glow) { x.shadowColor = o.glow; x.shadowBlur = o.blur || 30; }
+  x.fillText(str, px, y);
+  x.restore();
+}
+// word-by-word rise reveal
+function riseText(str, px, y, t, start, o = {}) {
+  const p = eo(seg(t, start, start + (o.dur || .9)));
+  const blurA = 1 - p;
+  x.save();
+  x.filter = blurA > .02 ? `blur(${blurA * 14}px)` : 'none';
+  text(str, px, y + (1 - p) * 60, { ...o, alpha: (o.alpha ?? 1) * p });
+  x.restore();
+}
+
+// ---------- background world ----------
+const R = rng(7);
+const bokeh = Array.from({ length: 70 }, () => ({ x: R() * W, y: R() * H, s: 20 + R() * 90, a: .04 + R() * .16, p: R() * 6.28, gold: R() < .72 }));
+const petals = Array.from({ length: 46 }, () => ({ x: R() * W, y: R() * H, v: .5 + R() * .8, s: 9 + R() * 10, rot: R() * 6.28, sw: R() * 6.28 }));
+function strand(y0, sag, n, phase) {
+  return Array.from({ length: n + 1 }, (_, j) => { const u = j / n; return { x: -40 + u * (W + 80), y: y0 + Math.sin(u * Math.PI) * sag, u, p: (j * 1.7 + phase) % 6.28 }; });
+}
+const strands = [strand(110, 120, 16, 0), strand(250, 150, 18, 2), strand(400, 120, 15, 4)];
+
+function background(t, opts = {}) {
+  const g = x.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#13261f'); g.addColorStop(.5, '#17241f'); g.addColorStop(1, '#0b1210');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  const glow = x.createRadialGradient(W / 2, H * 1.02, 20, W / 2, H * 1.02, H * .75);
+  glow.addColorStop(0, 'rgba(214,150,86,.30)'); glow.addColorStop(1, 'rgba(214,150,86,0)');
+  x.fillStyle = glow; x.fillRect(0, 0, W, H);
+  bokeh.forEach(b => {
+    const a = b.a * (.6 + .4 * Math.sin(t * .9 + b.p)) * (opts.bokeh ?? 1);
+    const col = b.gold ? '232,190,120' : '230,170,165';
+    const bx = b.x + Math.sin(t * .25 + b.p) * 24, by = b.y - t * 8 * (b.s / 100);
+    const yy = ((by % H) + H) % H;
+    const rg = x.createRadialGradient(bx, yy, 0, bx, yy, b.s);
+    rg.addColorStop(0, `rgba(${col},${a})`); rg.addColorStop(1, `rgba(${col},0)`);
+    x.fillStyle = rg; x.beginPath(); x.arc(bx, yy, b.s, 0, 6.28); x.fill();
+  });
+}
+
+function lights(t, reveal = 1, intensity = 1) {
+  strands.forEach((s, k) => {
+    // wire
+    x.strokeStyle = 'rgba(20,20,16,.85)'; x.lineWidth = 2;
+    x.beginPath(); s.forEach((b, i) => i ? x.lineTo(b.x, b.y) : x.moveTo(b.x, b.y)); x.stroke();
+    s.forEach((b, i) => {
+      const on = clamp((reveal * (s.length + 6) - i - k * 2) / 3); // bulbs light up in sequence
+      if (on <= 0) return;
+      const f = (.78 + .22 * Math.sin(t * 2.4 + b.p)) * on * intensity;
+      const rg = x.createRadialGradient(b.x, b.y + 14, 0, b.x, b.y + 14, 70);
+      rg.addColorStop(0, `rgba(255,212,145,${.55 * f})`); rg.addColorStop(1, 'rgba(255,212,145,0)');
+      x.fillStyle = rg; x.beginPath(); x.arc(b.x, b.y + 14, 70, 0, 6.28); x.fill();
+      x.fillStyle = `rgba(255,238,205,${f})`; x.beginPath(); x.ellipse(b.x, b.y + 14, 7, 9, 0, 0, 6.28); x.fill();
+    });
+  });
+}
+
+function petalFall(t, amt = 1) {
+  if (amt <= 0) return;
+  petals.forEach(p => {
+    const py = ((p.y + t * 90 * p.v) % (H + 60)) - 30;
+    const px = p.x + Math.sin(t * 1.1 + p.sw) * 40;
+    x.save(); x.translate(px, py); x.rotate(p.rot + t * .9 * p.v);
+    x.globalAlpha = .8 * amt; x.fillStyle = C.petal;
+    x.beginPath(); x.ellipse(0, 0, p.s, p.s * .55, 0, 0, 6.28); x.fill();
+    x.restore();
+  });
+}
+
+function vignette() {
+  const v = x.createRadialGradient(W / 2, H / 2, H * .25, W / 2, H / 2, H * .75);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.55)');
+  x.fillStyle = v; x.fillRect(0, 0, W, H);
+}
+
+function grain(t) {
+  // subtle film grain, deterministic per frame
+  const r = rng(1 + Math.floor(t * 30));
+  x.fillStyle = 'rgba(255,255,255,.035)';
+  for (let i = 0; i < 900; i++) x.fillRect(r() * W, r() * H, 2, 2);
+}
+
+// ---------- line-art props ----------
+const ICON = {
+  tent: 'M10 70 L50 22 L90 70 Z M50 22 V70 M30 46 Q50 52 70 46 M6 70 H94 M42 70 L50 52 L58 70',
+  chair: 'M34 14 H66 V48 H34 Z M38 14 V48 M46 14 V48 M54 14 V48 M62 14 V48 M30 50 H70 V56 H30 Z M33 56 L30 86 M67 56 L70 86 M40 56 L39 86 M60 56 L61 86',
+  table: 'M12 38 A38 12 0 1 0 88 38 A38 12 0 1 0 12 38 M12 38 V56 Q50 72 88 56 V38 M50 62 V86 M38 86 H62',
+  lights: 'M4 24 Q50 56 96 24 M16 36 m-5 0 a5 5 0 1 0 10 0 a5 5 0 1 0 -10 0 M33 44 m-5 0 a5 5 0 1 0 10 0 a5 5 0 1 0 -10 0 M50 47 m-5 0 a5 5 0 1 0 10 0 a5 5 0 1 0 -10 0 M67 44 m-5 0 a5 5 0 1 0 10 0 a5 5 0 1 0 -10 0 M84 36 m-5 0 a5 5 0 1 0 10 0 a5 5 0 1 0 -10 0',
+  arch: 'M22 86 V44 A28 28 0 0 1 78 44 V86 M20 40 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0 M27 28 a7 7 0 1 0 14 0 a7 7 0 1 0 -14 0 M40 20 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0 M53 22 a7 7 0 1 0 14 0 a7 7 0 1 0 -14 0 M66 34 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0',
+  floor: 'M8 66 L30 40 H92 L70 66 Z M19 53 H81 M50 40 L39 66 M71 40 L60 66 M29 40 L18 66',
+};
+const PATHS = Object.fromEntries(Object.entries(ICON).map(([k, d]) => [k, new Path2D(d)]));
+function drawIcon(name, cx, cy, size, p, alpha = 1) {
+  x.save();
+  x.globalAlpha = alpha;
+  x.translate(cx - size / 2, cy - size / 2); x.scale(size / 100, size / 100);
+  x.lineWidth = 2.4; x.lineCap = 'round'; x.lineJoin = 'round';
+  x.strokeStyle = C.gold; x.shadowColor = 'rgba(232,190,120,.8)'; x.shadowBlur = 18;
+  x.setLineDash([700 * p, 700]); x.stroke(PATHS[name]);
+  x.restore();
+}
+
+function roundRect(px, py, w, h, r) { x.beginPath(); x.roundRect(px, py, w, h, r); }
+
+// ---------- scenes ----------
+function sceneOpen(t) { // 0 - 3.4
+  const a = env(t, 0, 3.4, .01, .45);
+  if (a <= 0) return;
+  x.save(); x.globalAlpha = a;
+  riseText('Your day.', W / 2, 980, t, .9, { size: 120, color: C.ivory });
+  riseText('Your vision.', W / 2, 1130, t, 1.6, { size: 120, style: 'italic', color: C.gold, glow: 'rgba(210,176,122,.5)' });
+  x.restore();
+}
+
+function sceneHeadline(t) { // 3.2 - 6.6
+  const a = env(t, 3.2, 6.6, .3, .35);
+  if (a <= 0) return;
+  const zoom = 1 + seg(t, 3.2, 6.6) * .06;
+  x.save(); x.globalAlpha = a;
+  x.translate(W / 2, 1000); x.scale(zoom, zoom); x.translate(-W / 2, -1000);
+  text('WEDDING & EVENT RENTALS', W / 2, 800, { font: SANS, size: 30, weight: 600, color: C.gold, spacing: 9, alpha: eo(seg(t, 3.3, 3.9)) });
+  riseText('Set the scene', W / 2, 980, t, 3.45, { size: 132 });
+  riseText('for forever.', W / 2, 1140, t, 3.8, { size: 150, style: 'italic', color: C.gold, glow: 'rgba(210,176,122,.55)', blur: 40 });
+  x.restore();
+}
+
+const PROPS = [
+  { icon: 'tent', name: 'Sailcloth tents', price: 'from TT$2,800' },
+  { icon: 'chair', name: 'Gold chiavari chairs', price: 'TT$28 each' },
+  { icon: 'table', name: 'Tables & ivory linens', price: 'from TT$55' },
+  { icon: 'lights', name: 'Bistro string lights', price: 'TT$260 / 50 ft' },
+  { icon: 'arch', name: 'Floral arches', price: 'from TT$1,600' },
+  { icon: 'floor', name: 'Dance floors', price: 'TT$2,400' },
+];
+function sceneProps(t) { // 6.4 - 11.4, 6 cuts of ~.83s with whip transitions
+  const start = 6.4, step = .83;
+  if (t < start || t > start + step * PROPS.length + .2) return;
+  const i = Math.min(PROPS.length - 1, Math.floor((t - start) / step));
+  const lt = t - start - i * step;
+  const pr = PROPS[i];
+  const inP = eo(seg(lt, 0, .22)), outP = seg(lt, step - .14, step);
+  const dx = (1 - inP) * 260 - eio(outP) * 260;
+  x.save();
+  x.globalAlpha = Math.min(inP, 1 - outP * .9);
+  x.filter = (1 - inP) + outP > .05 ? `blur(${((1 - inP) + outP) * 18}px)` : 'none';
+  x.translate(dx, 0);
+  // halo
+  const halo = x.createRadialGradient(W / 2, 880, 10, W / 2, 880, 420);
+  halo.addColorStop(0, 'rgba(210,176,122,.22)'); halo.addColorStop(1, 'rgba(210,176,122,0)');
+  x.fillStyle = halo; x.fillRect(0, 400, W, 1000);
+  drawIcon(pr.icon, W / 2, 880, 520, eo(seg(lt, .02, .62)));
+  text(pr.name, W / 2, 1300, { size: 84, color: C.ivory });
+  text(pr.price, W / 2, 1390, { font: SANS, size: 44, weight: 700, color: C.gold, spacing: 2 });
+  x.restore();
+  // counter
+  text(`0${i + 1} / 0${PROPS.length}`, W / 2, 1620, { font: SANS, size: 28, weight: 600, color: C.dim, spacing: 6, alpha: .8 });
+}
+
+const QLINES = [
+  ['1 × Sailcloth tent 40×60', 7500], ['150 × Gold chiavari chairs', 4200], ['15 × Round tables 60"', 975],
+  ['15 × Ivory linens', 825], ['6 × Bistro light runs', 1560], ['1 × Dance floor 16×16', 2400], ['15 × Floral centrepieces', 2700],
+];
+function scenePhone(t) { // 11.2 - 16.4
+  const a = env(t, 11.2, 16.4, .35, .4);
+  if (a <= 0) return;
+  const lt = t - 11.2;
+  const rise = eo(seg(lt, 0, .7));
+  x.save(); x.globalAlpha = a;
+  text('Your quote in seconds', W / 2, 300, { size: 76, alpha: eo(seg(lt, .1, .7)) });
+  text('Tap. Adjust. Send.', W / 2, 380, { font: SANS, size: 36, weight: 500, color: C.dim, alpha: eo(seg(lt, .3, .9)) });
+  const pw = 700, ph = 1300, px = (W - pw) / 2, py = 470 + (1 - rise) * 300;
+  // phone
+  x.shadowColor = 'rgba(0,0,0,.6)'; x.shadowBlur = 80;
+  roundRect(px, py, pw, ph, 80); x.fillStyle = '#0b0f0e'; x.fill();
+  x.shadowBlur = 0;
+  roundRect(px + 18, py + 18, pw - 36, ph - 36, 64); x.fillStyle = C.night2; x.fill();
+  roundRect(px + pw / 2 - 90, py + 34, 180, 40, 20); x.fillStyle = '#000'; x.fill();
+  const ix = px + 70, iw = pw - 140;
+  text('SAMAN · INSTANT QUOTE', ix, py + 150, { font: SANS, size: 24, weight: 700, color: C.gold, spacing: 5, align: 'left' });
+  // guest counter
+  const guests = Math.round(lerp(0, 150, eio(seg(lt, .6, 1.8))));
+  text('Guests', ix, py + 230, { font: SANS, size: 28, weight: 500, color: C.dim, align: 'left' });
+  text(String(guests), ix, py + 340, { size: 110, align: 'left' });
+  // slider
+  x.fillStyle = 'rgba(244,238,228,.15)'; roundRect(ix, py + 380, iw, 8, 4); x.fill();
+  x.fillStyle = C.gold; roundRect(ix, py + 380, iw * guests / 400, 8, 4); x.fill();
+  x.beginPath(); x.arc(ix + iw * guests / 400, py + 384, 18, 0, 6.28); x.fill();
+  // lines
+  let total = 0;
+  QLINES.forEach(([name, cost], k) => {
+    const p = eo(seg(lt, 1.6 + k * .28, 1.9 + k * .28));
+    if (p <= 0) return;
+    total += cost * p;
+    const ly = py + 480 + k * 66;
+    x.save(); x.globalAlpha *= p; x.translate((1 - p) * 40, 0);
+    text(name, ix, ly, { font: SANS, size: 28, weight: 500, align: 'left' });
+    text(money(cost), ix + iw, ly, { font: SANS, size: 28, weight: 600, color: C.dim, align: 'right' });
+    x.fillStyle = 'rgba(244,238,228,.1)'; x.fillRect(ix, ly + 22, iw, 1.5);
+    x.restore();
+  });
+  // total
+  const tp = seg(lt, 3.6, 4.0);
+  text('Estimated total', ix, py + 985, { font: SANS, size: 30, weight: 500, color: C.dim, align: 'left', alpha: tp > 0 ? 1 : .5 });
+  text(money(total), ix + iw, py + 1040, { size: 60, color: C.gold, align: 'right', glow: 'rgba(210,176,122,.45)' });
+  // button + tap
+  const press = seg(lt, 4.2, 4.45), bs = 1 - Math.sin(press * Math.PI) * .05;
+  x.save(); x.translate(W / 2, py + 1160); x.scale(bs, bs);
+  roundRect(-iw / 2, -50, iw, 100, 50); x.fillStyle = '#25D366'; x.fill();
+  text('Send quote on WhatsApp', 0, 12, { font: SANS, size: 34, weight: 700, color: '#08130d' });
+  x.restore();
+  const rp = seg(lt, 4.25, 4.9);
+  if (rp > 0 && rp < 1) { x.beginPath(); x.arc(W / 2 + 120, py + 1160, 30 + rp * 160, 0, 6.28); x.strokeStyle = `rgba(255,255,255,${.6 * (1 - rp)})`; x.lineWidth = 6; x.stroke(); }
+  x.restore();
+}
+
+function sceneService(t) { // 16.2 - 19.4
+  const a = env(t, 16.2, 19.4, .3, .35);
+  if (a <= 0) return;
+  x.save(); x.globalAlpha = a;
+  const words = ['Delivered.', 'Set up.', 'Collected.'];
+  words.forEach((w, i) => riseText(w, W / 2, 800 + i * 170, t, 16.3 + i * .45, { size: 128, style: i === 2 ? 'italic' : '', color: i === 2 ? C.gold : C.ivory, glow: i === 2 ? 'rgba(210,176,122,.5)' : null }));
+  const p = eo(seg(t, 17.8, 18.4));
+  text('Chaguaramas to Tobago', W / 2, 1390, { font: SANS, size: 40, weight: 600, color: C.dim, spacing: 4, alpha: p });
+  x.restore();
+}
+
+function sceneEnd(t) { // 19.2 - 22
+  const a = seg(t, 19.2, 19.7);
+  if (a <= 0) return;
+  x.save(); x.globalAlpha = a;
+  const p = eo(seg(t, 19.3, 20.2));
+  // monogram ring
+  x.strokeStyle = C.gold; x.lineWidth = 3; x.shadowColor = 'rgba(210,176,122,.6)'; x.shadowBlur = 24;
+  x.beginPath(); x.arc(W / 2, 640, 130, -Math.PI / 2, -Math.PI / 2 + 6.283 * p); x.stroke(); x.shadowBlur = 0;
+  text('S', W / 2, 695, { size: 150, style: 'italic', color: C.gold, alpha: p });
+  text('Saman', W / 2, 960, { size: 150, style: 'italic', alpha: p });
+  text('EVENT RENTALS', W / 2, 1040, { font: SANS, size: 34, weight: 600, color: C.dim, spacing: 14, alpha: p });
+  // CTA pill
+  const cp = eo(seg(t, 20.0, 20.6)), pulse = 1 + Math.sin(Math.max(0, t - 20.6) * 5) * .02;
+  x.save(); x.globalAlpha *= cp; x.translate(W / 2, 1260); x.scale(pulse, pulse);
+  roundRect(-330, -70, 660, 140, 70); x.fillStyle = C.gold; x.fill();
+  text('Get your instant quote', 0, 14, { font: SANS, size: 42, weight: 800, color: C.night });
+  x.restore();
+  text('Link in bio · DM “QUOTE”', W / 2, 1420, { font: SANS, size: 36, weight: 600, color: C.ivory, alpha: cp });
+  text('Concept ad by Portside Digital', W / 2, 1760, { font: SANS, size: 26, weight: 500, color: C.dim, spacing: 2, alpha: cp * .8 });
+  x.restore();
+}
+
+window.render = function (t) {
+  x.save();
+  x.filter = 'none'; x.globalAlpha = 1;
+  background(t, { bokeh: 1 });
+  // lights: sequence on in the opener, dim behind the busy scenes
+  const reveal = seg(t, .1, 2.6);
+  const dimLights = 1 - .55 * (env(t, 6.4, 11.4, .3, .3) + env(t, 11.2, 16.4, .3, .3));
+  lights(t, reveal, dimLights);
+  petalFall(t, env(t, 3.3, 6.6, .5, .5) + env(t, 19.3, 22.5, .6, .01) * .7);
+  sceneOpen(t); sceneHeadline(t); sceneProps(t); scenePhone(t); sceneService(t); sceneEnd(t);
+  vignette(); grain(t);
+  // fade from/to black
+  const fb = Math.max(1 - seg(t, 0, .5), seg(t, DUR - .35, DUR));
+  if (fb > 0) { x.fillStyle = `rgba(0,0,0,${fb})`; x.fillRect(0, 0, W, H); }
+  x.restore();
+};
+window.DUR = DUR;
+document.fonts.ready.then(() => { window.READY = true; render(4.6); });
+</script>
+</body>
+</html>
