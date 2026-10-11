@@ -1,0 +1,90 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Bungee&display=swap">
+<style>html,body{margin:0;background:#000}canvas{display:block}.w{position:absolute;left:-9999px;font-family:"Luckiest Guy"}.b{font-family:Bungee}</style>
+</head><body><span class="w">HURRICANE</span><span class="w b">CAT 5</span>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+const c=document.getElementById('c'),x=c.getContext('2d'),W=1920,H=1080;
+let s=42;const r=()=>{s=(s*16807)%2147483647;return(s-1)/2147483646};
+function draw(){
+  // sky
+  let g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0b1a2e');g.addColorStop(.45,'#1d3b5a');g.addColorStop(.7,'#3e6a7e');g.addColorStop(1,'#0c2230');
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  // eerie green-yellow glow behind storm
+  let gl=x.createRadialGradient(1300,420,40,1300,420,700);gl.addColorStop(0,'rgba(190,255,170,.45)');gl.addColorStop(.4,'rgba(90,170,160,.25)');gl.addColorStop(1,'rgba(0,0,0,0)');
+  x.fillStyle=gl;x.fillRect(0,0,W,H);
+  // hurricane spiral bands
+  const cx=1300,cy=400;
+  for(let k=0;k<1400;k++){
+    const t=r()*Math.PI*10, rad=30+t*36+r()*60, a=t+r()*.5;
+    const px=cx+Math.cos(a)*rad*1.25, py=cy+Math.sin(a)*rad*.55;
+    const sz=40+r()*110, al=.05+r()*.10*(1-rad/1300);
+    if(al<=0)continue;
+    const cg=x.createRadialGradient(px,py,0,px,py,sz);
+    const shade=150+Math.floor(r()*90);
+    cg.addColorStop(0,`rgba(${shade},${shade+10},${shade+20},${al})`);cg.addColorStop(1,'rgba(0,0,0,0)');
+    x.fillStyle=cg;x.beginPath();x.arc(px,py,sz,0,6.28);x.fill();
+  }
+  // dark eye
+  let eye=x.createRadialGradient(cx,cy,0,cx,cy,90);eye.addColorStop(0,'rgba(8,20,35,.95)');eye.addColorStop(1,'rgba(8,20,35,0)');
+  x.fillStyle=eye;x.beginPath();x.ellipse(cx,cy,110,55,0,0,6.28);x.fill();
+  // funnel down to sea
+  for(let i=0;i<60;i++){
+    const y=cy+40+i*9, w=120-i*1.4+Math.sin(i*.5)*10;
+    x.fillStyle=`rgba(200,215,220,${.06+i*.002})`;
+    x.beginPath();x.ellipse(cx+Math.sin(i*.18)*40+i*1.5,y,w,14,0,0,6.28);x.fill();
+  }
+  // lightning
+  function bolt(sx,sy,len,w){x.save();x.strokeStyle='#eaffff';x.shadowColor='#9ff';x.shadowBlur=40;x.lineWidth=w;x.lineJoin='round';x.beginPath();x.moveTo(sx,sy);let px=sx,py=sy;
+    for(let i=0;i<9;i++){px+=(r()-.5)*90;py+=len/9;x.lineTo(px,py)}x.stroke();x.restore();}
+  bolt(820,120,520,7);bolt(1700,80,430,5);bolt(1020,60,300,4);
+  // sea
+  let sea=x.createLinearGradient(0,760,0,H);sea.addColorStop(0,'#1f5560');sea.addColorStop(1,'#071a22');
+  x.fillStyle=sea;x.fillRect(0,760,W,H-760);
+  for(let i=0;i<120;i++){const wx=r()*W,wy=770+r()*300,ww=60+r()*160;x.strokeStyle=`rgba(230,250,255,${.15+r()*.35})`;x.lineWidth=3+r()*4;x.beginPath();x.moveTo(wx,wy);x.quadraticCurveTo(wx+ww/2,wy-18-r()*20,wx+ww,wy);x.stroke();}
+  // island
+  x.fillStyle='#d9b779';x.beginPath();x.ellipse(520,860,430,90,0,0,6.28);x.fill();
+  x.fillStyle='#3f7a3a';x.beginPath();x.ellipse(500,835,330,55,0,Math.PI,0);x.fill();
+  // bent palm trees
+  function palm(bx,by,h,lean){x.save();x.strokeStyle='#5a3b22';x.lineWidth=18;x.lineCap='round';x.beginPath();x.moveTo(bx,by);x.quadraticCurveTo(bx+lean*.4,by-h*.6,bx+lean,by-h);x.stroke();
+    const tx=bx+lean,ty=by-h;x.strokeStyle='#2f7d32';x.lineWidth=14;
+    for(let i=0;i<7;i++){const a=-0.2+i*.16;x.beginPath();x.moveTo(tx,ty);x.quadraticCurveTo(tx+Math.cos(a)*120,ty-30+i*6,tx+Math.cos(a)*230,ty+40+i*14);x.stroke();}x.restore();}
+  palm(300,840,300,220);palm(760,830,260,200);palm(180,850,200,150);
+  // shelter
+  x.fillStyle='#8a5a32';x.fillRect(420,700,210,140);
+  x.fillStyle='#6b4224';x.beginPath();x.moveTo(400,705);x.lineTo(525,620);x.lineTo(650,705);x.closePath();x.fill();
+  x.fillStyle='#2b1a10';x.fillRect(500,760,55,80);
+  x.strokeStyle='#4a2d18';x.lineWidth=6;for(let i=0;i<5;i++){x.beginPath();x.moveTo(420,720+i*24);x.lineTo(630,720+i*24);x.stroke();}
+  // a plank ripping off
+  x.save();x.translate(700,600);x.rotate(-.5);x.fillStyle='#8a5a32';x.fillRect(0,0,150,22);x.restore();
+  // flying debris
+  for(let i=0;i<40;i++){x.save();x.translate(650+r()*1000,150+r()*600);x.rotate(r()*6);x.fillStyle=['#8a5a32','#2f7d32','#c9c2b0'][i%3];x.fillRect(0,0,14+r()*40,6+r()*12);x.restore();}
+  // characters (simple silhouettes) bracing
+  function guy(px,py,sc,col){x.save();x.translate(px,py);x.scale(sc,sc);x.fillStyle=col;
+    x.beginPath();x.arc(0,-95,22,0,6.28);x.fill();x.fillRect(-20,-72,40,62);
+    x.save();x.translate(-18,-62);x.rotate(-1.1);x.fillRect(0,0,12,52);x.restore();x.save();x.translate(18,-62);x.rotate(-0.4);x.fillRect(0,0,12,52);x.restore();
+    x.fillRect(-18,-12,14,60);x.fillRect(4,-12,14,60);x.restore();}
+  guy(380,840,1,'#ff5a36');guy(690,845,.95,'#ffd23a');
+  // rain streaks
+  x.strokeStyle='rgba(220,240,255,.18)';x.lineWidth=2;for(let i=0;i<600;i++){const rx=r()*W,ry=r()*H;x.beginPath();x.moveTo(rx,ry);x.lineTo(rx-25,ry+60);x.stroke();}
+  // vignette
+  let v=x.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*1.05);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.6)');x.fillStyle=v;x.fillRect(0,0,W,H);
+  // title
+  x.save();x.textAlign='left';x.lineJoin='round';
+  function title(t,px,py,size,fill,rot){x.save();x.translate(px,py);x.rotate(rot);x.font=`${size}px "Luckiest Guy"`;
+    x.lineWidth=size*.16;x.strokeStyle='#0a1020';x.strokeText(t,0,0);
+    const tg=x.createLinearGradient(0,-size,0,0);tg.addColorStop(0,fill[0]);tg.addColorStop(1,fill[1]);x.fillStyle=tg;x.shadowColor='rgba(0,0,0,.6)';x.shadowOffsetY=10;x.fillText(t,0,0);x.restore();}
+  title('HURRICANE',70,250,190,['#ffffff','#a9e8ff'],-0.05);
+  title('SURVIVAL',95,430,170,['#ffe14a','#ff8a1f'],-0.05);
+  x.restore();
+  // CAT 5 badge
+  x.save();x.translate(1640,900);x.rotate(.12);x.fillStyle='#e8231f';x.strokeStyle='#fff';x.lineWidth=10;
+  x.beginPath();x.roundRect(-150,-70,300,140,28);x.fill();x.stroke();
+  x.font='92px Bungee';x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';x.fillText('CAT 5',0,8);x.restore();
+  // tag line
+  x.save();x.font='54px "Luckiest Guy"';x.fillStyle='#fff';x.lineWidth=10;x.strokeStyle='#0a1020';x.strokeText('BUILD. HIDE. SURVIVE.',95,530);x.fillText('BUILD. HIDE. SURVIVE.',95,530);x.restore();
+  window.DONE=true;
+}
+document.fonts.ready.then(()=>setTimeout(draw,50));
+</script></body></html>
