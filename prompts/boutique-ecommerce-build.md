@@ -80,13 +80,13 @@ NON-NEGOTIABLE RULES
 2. Never trust prices, discounts or totals from the browser. The server recalculates everything from
    the database at checkout and at payment confirmation.
 3. Online checkout reserves stock for 20 minutes while the customer pays. If payment does not
-   complete, release it automatically (Cloudflare Cron Trigger + on next read). Paid orders convert the reservation
-   into a sale. Cancelled/refunded orders return stock through the ledger.
+   complete, release it automatically (Cloudflare Cron Trigger + on next read). Paid orders convert
+   the reservation into a sale. Cancelled/refunded orders return stock through the ledger.
 4. An order becomes "paid" ONLY after the server verifies the payment with WiPay (signed callback or
    server-to-server status check, per WiPay's docs). Payment callbacks must be idempotent (the same
    callback twice must not double anything). Log every callback.
-5. The Supabase service-role key and WiPay secrets live only in server environment variables. Never
-   in client code, never committed. Add .env.example with placeholder names only.
+5. The Supabase service-role key and WiPay secrets live only in server-side secrets (Cloudflare secrets /
+   .dev.vars). Never in client code, never committed. Add .dev.vars.example with placeholder names only.
 6. RLS: the public can read active products/variants/images only. Customers never read other orders.
    Staff can use POS and view/update orders but cannot change prices, discounts, settings or staff.
    Owner can do everything. Test these rules.
@@ -97,10 +97,25 @@ NON-NEGOTIABLE RULES
 9. Don't guess APIs. Read the current docs for Next.js, Supabase, Resend and WiPay before using them.
    If WiPay's docs are missing or unclear, STOP and tell me what you need instead of inventing it.
 
+SUPABASE SETUP (you do this, I only log in)
+- Use the Supabase CLI (install it if missing). Run `supabase login` and let me sign in in the browser.
+  If I've connected the Supabase MCP server instead, you may use it.
+- Create the project in my organisation (ask me for the name and the closest region, e.g. US East),
+  link it, and keep ALL database changes as migration files in supabase/migrations, applied with
+  `supabase db push`. Never change the live database by hand without a migration.
+- Set up: tables, RLS policies, Postgres functions, a private storage bucket for staff uploads and a
+  public one for product images, Auth settings (email + password, no public sign-ups, staff invited by
+  the owner), site URL and redirect URLs for local, preview and live domains.
+- Use a local Supabase (`supabase start`, needs Docker) or a separate dev project for testing. Never
+  run tests or seed data against the live project.
+- Put the project URL and anon key in .dev.vars / Cloudflare settings yourself; tell me before using
+  the service-role key anywhere and keep it server-only.
+- Tell me the steps only I can do (billing, upgrading the plan, approving logins).
+
 PHASE 1: SETUP (CHECKPOINT after)
 - Scaffold the project with the Cloudflare OpenNext setup (wrangler config, preview command that runs
-  the app in the Workers runtime locally), Tailwind theme from the demo's colours/fonts, Supabase migrations for the
-  whole data model, RLS policies, seed data (2 categories, 6 products with sizes and colours,
+  the app in the Workers runtime locally), Tailwind theme from the demo's colours/fonts, Supabase
+  migrations for the whole data model, RLS policies, seed data (2 categories, 6 products with sizes and colours,
   realistic stock, 1 owner + 1 staff test user).
 - Write the stock RPC functions first (reserve, release, sell, restock, adjust, return) with unit
   tests, including a concurrency test: 10 parallel purchases of a variant with stock 1 → exactly 1
