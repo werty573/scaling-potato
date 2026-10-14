@@ -4,7 +4,8 @@
 
 1. Install **Node.js (LTS)**, **Git** and **Claude Code** on your PC.
 2. Create free accounts in **your client's name/email** (she owns them, you get access):
-   **Supabase** (database), **Vercel** (hosting), **Resend** (emails), **GitHub** (code).
+   **Supabase** (database), **Cloudflare** (hosting, free plan allows business sites), **Resend** (emails),
+   **GitHub** (code).
 3. Ask **WiPay** for their developer/API docs and test (sandbox) account details.
 4. Make a folder, e.g. `C:\dev\boutique`, and copy the **demo store files** into `C:\dev\boutique\demo`.
 5. Put her **logo**, a few **product photos** and her **product list** (if she has one) in `C:\dev\boutique\assets`.
@@ -34,7 +35,11 @@ STACK (use these unless something is impossible; tell me before changing anythin
 - Next.js (App Router) + TypeScript (strict) + Tailwind CSS.
 - Supabase: Postgres, Auth (email + password for staff), Storage (product images),
   Row Level Security on EVERY table.
-- Vercel hosting + Vercel Cron for scheduled jobs.
+- Cloudflare hosting: deploy Next.js to Cloudflare Workers with the official OpenNext adapter
+  (@opennextjs/cloudflare) and Wrangler. Read Cloudflare's current Next.js guide first and only use
+  Next.js features that adapter supports. Cloudflare Cron Triggers for scheduled jobs. Cloudflare's
+  free plan allows commercial use; keep within it.
+- Store secrets with `wrangler secret put` (production) and .dev.vars (local, never committed).
 - Resend for emails. Zod to validate every input. Vitest for unit tests, Playwright for end-to-end.
 - WiPay for online card payments (details below).
 - Keep monthly running cost at or near zero on free tiers.
@@ -75,7 +80,7 @@ NON-NEGOTIABLE RULES
 2. Never trust prices, discounts or totals from the browser. The server recalculates everything from
    the database at checkout and at payment confirmation.
 3. Online checkout reserves stock for 20 minutes while the customer pays. If payment does not
-   complete, release it automatically (cron + on next read). Paid orders convert the reservation
+   complete, release it automatically (Cloudflare Cron Trigger + on next read). Paid orders convert the reservation
    into a sale. Cancelled/refunded orders return stock through the ledger.
 4. An order becomes "paid" ONLY after the server verifies the payment with WiPay (signed callback or
    server-to-server status check, per WiPay's docs). Payment callbacks must be idempotent (the same
@@ -85,13 +90,16 @@ NON-NEGOTIABLE RULES
 6. RLS: the public can read active products/variants/images only. Customers never read other orders.
    Staff can use POS and view/update orders but cannot change prices, discounts, settings or staff.
    Owner can do everything. Test these rules.
-7. Rate-limit checkout, discount-code checks and login. Validate all inputs with Zod.
+7. Rate-limit checkout, discount-code checks and login (Cloudflare rate limiting rules or the Workers
+   rate limiting binding). Turn on Cloudflare Turnstile on checkout and login to stop bots.
+   Validate all inputs with Zod.
 8. Mobile first. Admin and POS must work well on a tablet and a phone.
 9. Don't guess APIs. Read the current docs for Next.js, Supabase, Resend and WiPay before using them.
    If WiPay's docs are missing or unclear, STOP and tell me what you need instead of inventing it.
 
 PHASE 1: SETUP (CHECKPOINT after)
-- Scaffold the project, Tailwind theme from the demo's colours/fonts, Supabase migrations for the
+- Scaffold the project with the Cloudflare OpenNext setup (wrangler config, preview command that runs
+  the app in the Workers runtime locally), Tailwind theme from the demo's colours/fonts, Supabase migrations for the
   whole data model, RLS policies, seed data (2 categories, 6 products with sizes and colours,
   realistic stock, 1 owner + 1 staff test user).
 - Write the stock RPC functions first (reserve, release, sell, restock, adjust, return) with unit
@@ -135,7 +143,8 @@ PHASE 4: ADMIN DASHBOARD (CHECKPOINT after)
 - Inventory: stock per variant, restock (receive new stock), adjustments with a required reason,
   full movement history per variant, stock value report.
 - Low-stock alerts: badge in the dashboard, instant email when a variant drops to or below its
-  threshold (once, not on every sale), and a daily 8am digest (Vercel Cron).
+  threshold (once, not on every sale), and a daily 8am Trinidad time digest (Cloudflare Cron Trigger;
+  cron runs in UTC, so 8am AST = 12:00 UTC).
 - Orders: list with filters (status, channel, date, payment), order detail, change status (with
   history), cancel (returns stock), refund (full or per item, returns stock unless marked damaged),
   print packing slip, customer contact buttons (WhatsApp/email).
@@ -171,10 +180,12 @@ PHASE 6: TESTING, SECURITY & LAUNCH (CHECKPOINT after)
 - Lighthouse on home, shop and product pages on mobile; aim for 90+ performance and accessibility.
 - Backups: confirm Supabase backups for the plan we're on and add a weekly CSV export of products,
   stock and orders emailed to the owner.
-- Deploy to Vercel, connect the domain, switch WiPay to live only when I say so.
+- Deploy to Cloudflare (connect the GitHub repo so every push to main deploys, with preview
+  deployments for other branches). Connect the domain in Cloudflare DNS with HTTPS. Set the WiPay
+  callback URL to the live domain. Switch WiPay to live only when I say so.
 - Write OWNER_GUIDE.md in plain English (how to add a product, restock, handle an order, create a
   discount, use the POS, close a shift, read reports) and HANDOVER.md for me (env vars, accounts,
-  how to deploy, how to restore a backup).
+  how to deploy with Wrangler, how to roll back a deployment, how to restore a backup).
 
 HOW TO WORK
 - Before Phase 1, show me a short plan and any questions. Then go.
@@ -190,6 +201,8 @@ HOW TO WORK
 
 - **Effort:** on the Pro plan, use **high** for Phases 1, 3 and 6 (stock, payments, security) and
   **medium** for the rest.
+- **Monthly cost:** Cloudflare free + Supabase free to start. Move Supabase to its paid plan (about
+  US$25/month) once she's selling, for daily backups.
 - If it gets stuck or the chat gets long, start a new session and say: *"Read the README and git log,
   we're on Phase X, continue."*
 - After each phase, show the client screenshots. It keeps them confident about paying the next
