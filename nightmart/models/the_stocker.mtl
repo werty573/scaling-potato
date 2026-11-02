@@ -1,0 +1,33 @@
+newmtl M_Stocker_skin
+Kd 0.620 0.640 0.600
+Ks 0.05 0.05 0.05
+
+newmtl M_Stocker_bone
+Kd 0.860 0.820 0.700
+Ks 0.05 0.05 0.05
+
+newmtl M_Stocker_claw
+Kd 0.120 0.100 0.100
+Ks 0.05 0.05 0.05
+
+newmtl M_Stocker_cloth
+Kd 0.150 0.150 0.170
+Ks 0.05 0.05 0.05
+
+newmtl M_Stocker_apron
+Kd 0.550 0.200 0.100
+Ks 0.05 0.05 0.05
+
+newmtl M_Stocker_badge
+Kd 0.950 0.950 0.900
+Ks 0.05 0.05 0.05
+
+newmtl M_Stocker_plastic
+Kd 0.100 0.100 0.110
+Ks 0.05 0.05 0.05
+
+newmtl M_Stocker_eye
+Kd 1.000 0.050 0.050
+Ks 0.05 0.05 0.05
+Ke 4.0 0.2 0.2
+
